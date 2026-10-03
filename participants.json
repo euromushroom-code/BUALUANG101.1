@@ -1,0 +1,21 @@
+{
+  "year": 2026,
+  "total": 0,
+  "participants": [],
+  "note": "เติมข้อมูลจริงภายหลัง ห้ามใช้ข้อมูลสมมติเป็นข้อมูลผู้เข้าร่วมจริง",
+  "schema": {
+    "id": "รหัสผู้เข้าร่วม",
+    "name": "ชื่อ-นามสกุล",
+    "nickname": "ชื่อเล่น (ถ้ามี)",
+    "institution": "ชื่อสถาบัน",
+    "province": "จังหวัด",
+    "major": "สาขา",
+    "style": ["แนวทาง/สื่อที่สนใจ"],
+    "bio": "ประวัติย่อ",
+    "portrait": "assets/images/participants/filename.jpg",
+    "works": [
+      {"title":"ชื่อผลงาน","image":"assets/images/participants/filename.jpg","year":2026}
+    ],
+    "social": {"instagram":"","facebook":"","website":""}
+  }
+}

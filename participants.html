@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="รายชื่อและคลังข้อมูลผู้เข้าร่วมโครงการดาวเด่นบัวหลวง 101">
+<title>ผู้เข้าร่วม — ดาวเด่นบัวหลวง 101</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<header class="site-header"><a class="brand" href="../index.html">ดาวเด่น<span>บัวหลวง 101</span></a><button class="menu-toggle" aria-label="เปิดเมนู">☰</button><nav><a href="about.html">โครงการ</a><a class="active" href="participants.html">ผู้เข้าร่วม</a><a href="activities.html">กิจกรรม</a><a href="news.html">ข่าวสาร</a><a href="contact.html">ติดต่อ</a></nav></header>
+<main>
+<section class="section page-hero"><p class="eyebrow">PARTICIPANT ARCHIVE</p><h1>ผู้เข้าร่วมโครงการ</h1><p class="lead">ค้นหาและสำรวจข้อมูลผู้เข้าร่วม ผลงาน และสถาบัน โดยข้อมูลสามารถอัปเดตจากไฟล์ JSON ได้โดยไม่ต้องแก้หน้าเว็บ</p></section>
+<section class="section compact-section">
+<div class="toolbar"><label class="search-box">⌕<input id="participantSearch" type="search" placeholder="ค้นหาชื่อ / สถาบัน / จังหวัด / สาขา"></label><select id="institutionFilter"><option value="">ทุกสถาบัน</option></select><select id="provinceFilter"><option value="">ทุกจังหวัด</option></select></div>
+<div class="archive-meta"><strong id="resultCount">กำลังโหลด…</strong><span id="dataStatus"></span></div>
+<div id="participantGrid" class="participant-grid"></div>
+<div id="emptyState" class="empty-state" hidden><div class="empty-icon">✦</div><h3>ยังไม่มีข้อมูลผู้เข้าร่วม</h3><p>เมื่อมีข้อมูลที่ยืนยันแล้ว ให้นำไปใส่ใน <code>data/participants.json</code> แล้วหน้าเว็บจะสร้างรายการให้อัตโนมัติ</p></div>
+</section>
+</main>
+<footer><strong>ดาวเด่นบัวหลวง 101</strong><p>© 2026 Bualuang 101</p></footer>
+<script src="../js/main.js"></script>
+<script>
+const state={items:[],filtered:[]};
+const esc=s=>String(s??'').replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));
+async function loadParticipants(){
+ try{
+  const [p,i]=await Promise.all([fetch('../data/participants.json'),fetch('../data/institutions.json')]);
+  const pd=await p.json(), id=await i.json(); state.items=pd.participants||[];
+  const institutions=[...(id.institutions||[]).map(x=>typeof x==='string'?x:x.name),...state.items.map(x=>x.institution)].filter(Boolean);
+  const provinces=[...state.items.map(x=>x.province)].filter(Boolean);
+  fill('institutionFilter',institutions); fill('provinceFilter',provinces); document.getElementById('dataStatus').textContent=`ข้อมูลปี ${pd.year||2026}`; render();
+ }catch(e){document.getElementById('resultCount').textContent='โหลดข้อมูลไม่สำเร็จ';document.getElementById('dataStatus').textContent='ตรวจสอบ path ของ data/participants.json';}
+}
+function fill(id,vals){const el=document.getElementById(id), unique=[...new Set(vals)].sort((a,b)=>a.localeCompare(b,'th')); unique.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;el.appendChild(o)})}
+function render(){const q=document.getElementById('participantSearch').value.trim().toLowerCase(), ins=document.getElementById('institutionFilter').value, prov=document.getElementById('provinceFilter').value; state.filtered=state.items.filter(x=>{const hay=[x.name,x.nickname,x.institution,x.province,x.major,...(x.style||[])].join(' ').toLowerCase();return(!q||hay.includes(q))&&(!ins||x.institution===ins)&&(!prov||x.province===prov)}); const grid=document.getElementById('participantGrid');document.getElementById('resultCount').textContent=`พบ ${state.filtered.length} คน`; grid.innerHTML=state.filtered.map(card).join('');document.getElementById('emptyState').hidden=state.filtered.length>0||state.items.length>0;}
+function card(x){const initials=(x.name||'ผู้เข้าร่วม').trim().split(/\s+/).slice(0,2).map(s=>s[0]).join('');const tags=(x.style||[]).slice(0,3).map(t=>`<span>${esc(t)}</span>`).join('');return `<article class="participant-card"><div class="avatar">${esc(initials)}</div><div class="participant-info"><p class="eyebrow">${esc(x.institution||'ยังไม่ระบุสถาบัน')}</p><h3>${esc(x.name||'ยังไม่ระบุชื่อ')}</h3><p>${esc([x.major,x.province].filter(Boolean).join(' · ')||'ข้อมูลกำลังจัดเตรียม')}</p><div class="tag-list">${tags}</div>${x.id?`<a class="text-link" href="participant.html?id=${encodeURIComponent(x.id)}">ดูโปรไฟล์ →</a>`:''}</div></article>`}
+['participantSearch','institutionFilter','provinceFilter'].forEach(id=>document.getElementById(id).addEventListener('input',render));loadParticipants();
+</script>
+</body></html>
